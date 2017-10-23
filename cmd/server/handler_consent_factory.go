@@ -5,6 +5,7 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/hydra/config"
 	"github.com/ory/hydra/oauth2"
+	"github.com/vpugar/hydra-boltdb-backend/backend"
 )
 
 func injectConsentManager(c *config.Config) {
@@ -22,6 +23,13 @@ func injectConsentManager(c *config.Config) {
 		var err error
 		if manager, err = con.NewConsentRequestManager(); err != nil {
 			c.GetLogger().Fatalf("Could not load client manager plugin %s", err)
+		}
+		break
+
+	case *backend.BoltdbConnection:
+		var err error
+		if manager, err = con.NewConsentRequestManager(); err != nil {
+			c.GetLogger().Fatalf("Could not load consent manager %s", err)
 		}
 		break
 	default:

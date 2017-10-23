@@ -29,6 +29,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 	"gopkg.in/yaml.v2"
+	"github.com/vpugar/hydra-boltdb-backend/backend"
 )
 
 type Config struct {
@@ -221,6 +222,16 @@ func (c *Config) Context() *Context {
 				L:   c.GetLogger(),
 			}
 			break
+		case "boltdb":
+			{
+				c.GetLogger().Infof("Database set to %s", u.Scheme)
+				c.GetLogger().Infof("Database path %s", u.Host)
+				pc := backend.NewBoltdbConnection(u.Host)
+				if err := pc.Connect(); err != nil {
+					c.GetLogger().WithError(err).Fatalf("Could not connect via database boltdb")
+				}
+				connection = pc
+			}
 		default:
 			c.GetLogger().Fatalf(`Unknown DSN "%s" in DATABASE_URL: %s`, u.Scheme, c.DatabaseURL)
 		}
@@ -241,6 +252,18 @@ func (c *Config) Context() *Context {
 		}
 		break
 	case *PluginConnection:
+		var err error
+		manager, err = con.NewPolicyManager()
+		if err != nil {
+			c.GetLogger().Fatalf("Could not load policy manager plugin %s", err)
+		}
+
+		groupManager, err = con.NewGroupManager()
+		if err != nil {
+			c.GetLogger().Fatalf("Could not load group manager plugin %s", err)
+		}
+		break
+	case *backend.BoltdbConnection:
 		var err error
 		manager, err = con.NewPolicyManager()
 		if err != nil {

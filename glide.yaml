@@ -3,9 +3,9 @@ import:
 - package: github.com/sirupsen/logrus
   version: master
 - package: github.com/Sirupsen/logrus
+  version: master
   repo: https://github.com/sirupsen/logrus.git
   vcs: git
-  version: master
 - package: github.com/dgrijalva/jwt-go
   version: 3.0.0
 - package: github.com/go-sql-driver/mysql
@@ -25,8 +25,6 @@ import:
 - package: github.com/meatballhat/negroni-logrus
 - package: github.com/moul/http2curl
 - package: github.com/oleiade/reflections
-  version: 1.0.0
-- package: github.com/go-resty/resty
   version: 1.0.0
 - package: github.com/ory/fosite
   version: 0.11.3
@@ -75,6 +73,8 @@ import:
   - clientcredentials
 - package: gopkg.in/yaml.v2
 - package: github.com/mohae/deepcopy
+- package: github.com/vpugar/boltdbclient
+- package: github.com/vpugar/hydra-boltdb-backend
 testImport:
 - package: github.com/bmizerany/assert
 - package: github.com/ory/dockertest

@@ -5,6 +5,7 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/hydra/config"
 	"github.com/ory/hydra/jwk"
+	"github.com/vpugar/hydra-boltdb-backend/backend"
 )
 
 func injectJWKManager(c *config.Config) {
@@ -25,6 +26,16 @@ func injectJWKManager(c *config.Config) {
 	case *config.PluginConnection:
 		var err error
 		ctx.KeyManager, err = con.NewJWKManager()
+		if err != nil {
+			c.GetLogger().Fatalf("Could not load client manager plugin %s", err)
+		}
+		break
+	case *backend.BoltdbConnection:
+		var err error
+		ctx.KeyManager, err = con.NewJWKManager(
+			&jwk.AEAD{
+				Key: c.GetSystemSecret(),
+			})
 		if err != nil {
 			c.GetLogger().Fatalf("Could not load client manager plugin %s", err)
 		}

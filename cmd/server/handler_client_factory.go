@@ -5,6 +5,7 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/hydra/client"
 	"github.com/ory/hydra/config"
+	"github.com/vpugar/hydra-boltdb-backend/backend"
 )
 
 func newClientManager(c *config.Config) client.Manager {
@@ -23,6 +24,13 @@ func newClientManager(c *config.Config) client.Manager {
 		}
 	case *config.PluginConnection:
 		if m, err := con.NewClientManager(); err != nil {
+			c.GetLogger().Fatalf("Could not load client manager plugin %s", err)
+		} else {
+			return m
+		}
+		break
+	case *backend.BoltdbConnection:
+		if m, err := con.NewClientManager(ctx.Hasher); err != nil {
 			c.GetLogger().Fatalf("Could not load client manager plugin %s", err)
 		} else {
 			return m

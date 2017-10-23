@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	context2 "context"
 
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
@@ -24,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
+	"github.com/vpugar/hydra-boltdb-backend/backend"
 )
 
 func RunHost(c *config.Config) func(cmd *cobra.Command, args []string) {
@@ -102,10 +104,26 @@ func RunHost(c *config.Config) func(cmd *cobra.Command, args []string) {
 			}
 
 			return err
-		}, srv.Shutdown)
-		logger.WithError(err).Fatal("Could not gracefully run server")
+		}, func(ctx context2.Context) error {
+			connection := c.Context().Connection
+			if connection != nil {
+				if boltdbConnection, ok := connection.(*backend.BoltdbConnection); ok {
+					c.GetLogger().Infof("Closing database")
+					err := boltdbConnection.Disconnect()
+					if err != nil {
+						c.GetLogger().WithError(err).Fatalf("Could not close database")
+					}
+				}
+			}
+			return srv.Shutdown(ctx)
+		})
+		if err != nil {
+			logger.WithError(err).Fatal("Could not gracefully run server")
+		}
 	}
 }
+
+
 
 type Handler struct {
 	Clients *client.Handler
